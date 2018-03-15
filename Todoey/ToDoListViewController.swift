@@ -11,7 +11,7 @@ import UIKit
 class ToDoListViewController: UITableViewController {
 
     
-    let itemArray = ["sik", "yarrak", "cük"]
+    var itemArray = ["sik", "yarrak", "cük"]
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.backgroundColor = UIColor.blue
@@ -40,6 +40,27 @@ class ToDoListViewController: UITableViewController {
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
     }
     tableView.deselectRow(at: indexPath, animated: true)
+    }
+    //MARK - Add new items
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "add new toDoey item", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "add item", style: .default) { (action ) in
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()
+           
+        }
+        
+       alert.addTextField { (alertTextField) in
+        alertTextField.placeholder = "Create new Item"
+        textField = alertTextField
+        
+        }
+        
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
     }
 }
 
