@@ -10,28 +10,15 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
 
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     var itemArray = [Item]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         
-        let newItem = Item()
-        newItem.title = "Hadi"
-        itemArray.append(newItem)
-        
-        let newItem2 = Item()
-        newItem2.title = "Hadi2"
-        itemArray.append(newItem2)
-        
-        let newItem3 = Item()
-        newItem3.title = "Hadi3"
-        itemArray.append(newItem3)
-        
-        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
-            itemArray = items
-        }
+        loadItems()
         
         tableView.backgroundColor = UIColor.blue
         
@@ -49,6 +36,9 @@ class ToDoListViewController: UITableViewController {
         
         
         cell.accessoryType = item.done ? .checkmark : .none
+        
+        //yukaridaki kodun aynisi
+        //+++++++++++------+++++++
 //        if item.done == true {
 //            cell.accessoryType = .checkmark
 //        } else {
@@ -59,16 +49,18 @@ class ToDoListViewController: UITableViewController {
     }
     //MARK - TAbleView Delegate Methods
    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    //print(itemArray[indexPath.row])
+    
     
      itemArray[indexPath.row].done = !itemArray[indexPath.row].done
     
-    tableView.reloadData()
+    saveItems()
+   
     tableView.deselectRow(at: indexPath, animated: true)
     }
     //MARK - Add new items
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
         var textField = UITextField()
         
         let alert = UIAlertController(title: "add new toDoey item", message: "", preferredStyle: .alert)
@@ -79,11 +71,7 @@ class ToDoListViewController: UITableViewController {
             newItem.title = textField.text!
             
             self.itemArray.append(newItem)
-            
-            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
-            
-            self.tableView.reloadData()
-           
+            self.saveItems()
         }
         
        alert.addTextField { (alertTextField) in
@@ -98,8 +86,32 @@ class ToDoListViewController: UITableViewController {
         
         present(alert, animated: true, completion: nil)
     }
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        }
+        catch {
+            print("Error encoding item array \(error)")
+        }
+        self.tableView.reloadData()
+        
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!){
+           let decoder = PropertyListDecoder()
+            do {itemArray = try decoder.decode([Item].self, from: data)
+        }
+         catch{
+            print("error decoding item array \(error)")
+        }
+    }
 }
-
+    
+    
+}
 
 
 
